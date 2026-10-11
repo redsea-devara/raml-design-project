@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="put:\loans\(loan_type)\(loan_id):application\json:magneq-loan-latest-api-config">
+        <ee:transform doc:name="payload loanid" doc:id="e3153835-265b-4a4c-9189-52cc6d44520a" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="Loanid" ><![CDATA[%dw 2.0
+output application/json
+var loanId=payload.loan_id
+---
+loanId]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-variable value="#[attributes.uriParams.loan_type]" doc:name="LoanType" doc:id="a4dfc515-d065-431b-8be3-877268197b3b" variableName="loantype"/>
+		<set-variable value="#[attributes.uriParams.loan_id]" doc:name="loanID" doc:id="58b3f07b-c2c4-440d-b559-422f6fe24e98" variableName="loanID"/>
+		<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="loan_type">attributes.uriParams.'loan_type'</ee:set-variable>
+                <ee:set-variable variableName="loan_id">attributes.uriParams.'loan_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform> [STUDIO] -->
+        <ee:transform doc:name="loan update Response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  loan_id: vars.loantype ++ "_" ++ vars.loanID,
+  payload_loanid:vars.Loanid,
+  message:vars.loantype ++ " Loan info updated successfully"
+} ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="patch:\loans\(loan_type)\(loan_id):application\json:magneq-loan-latest-api-config">
+        <ee:transform doc:name="modify_loanamount" doc:id="46ee1f55-e72c-4b02-bdc6-ecf77344b669" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="modify_loanamount" ><![CDATA[%dw 2.0
+output application/json
+var loanAmount=payload.loan_amount
+---
+loanAmount]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-variable value="#[attributes.uriParams.loan_type]" doc:name="loantype" doc:id="c11a135c-c276-4d1c-beac-7f9bae929990" variableName="loantype"/>
+		<set-variable value="#[attributes.uriParams.loan_id]" doc:name="loanid" doc:id="0250ed9b-9e99-45eb-abeb-1e3530e7d126" variableName="loanid"/>
+		<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="loan_type">attributes.uriParams.'loan_type'</ee:set-variable>
+                <ee:set-variable variableName="loan_id">attributes.uriParams.'loan_id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform> [STUDIO] -->
+        <ee:transform doc:name="specific field update in loan resource response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  loan_id: vars.loanid,
+  specific_field_update_resource:vars.modify_loanamount,
+  message: vars.loantype ++ " Loan info updated successfully"
+} ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    
+    
+	</mule>

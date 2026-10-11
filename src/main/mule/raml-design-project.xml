@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="post:\loans:application\json:magneq-loan-latest-api-config">
+        <ee:transform doc:name="customername from payload" doc:id="8a7d9905-c81e-422a-9182-af6ad08d0faf" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="customername" ><![CDATA[%dw 2.0
+output application/json
+var cust_name=payload.customer_name
+---
+cust_name]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-variable value="#[payload.loan_type]" doc:name="loanType" doc:id="e4363a8e-9e4e-4569-81b4-14485362293d" variableName="loanType"/>
+		<ee:transform doc:name="loanaccount response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+
+---
+{
+  loan_id: vars.loanType ++ "_" ++ uuid(),
+  cust_name:vars.customername,
+  message: vars.loanType ++ " Loan Account created successfully"
+} ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	</mule>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="get:\loans\(loan_type)\(loan_id):magneq-loan-latest-api-config">
+        <set-variable value="#[attributes.uriParams.loan_type]" doc:name="loantype" doc:id="b8a98fe2-5803-445b-9f81-a4807350a8d1" variableName="loantype"/>
+		<set-variable value="#[attributes.uriParams.loan_id]" doc:name="loanId details" doc:id="f13d39df-5bd4-4ded-a59c-507b2de2b4cb" variableName="loanId"/>
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  customer_id: "1234",
+  loan_id:vars.loantype ++ "_" ++ vars.loanId,
+  loan_amount: 20000,
+  tenure: 60,
+  interest: 8
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\loans\(loan_type):magneq-loan-latest-api-config">
+        <set-variable value="#[attributes.uriParams.loan_type]" doc:name="fetch details using laontype" doc:id="741b3021-6958-4360-a5a4-317a3977b5b6" variableName="loantype"/>
+		<set-variable value="#[attributes.queryParams.customer_id]" doc:name="queryparams used in fetch customer details" doc:id="b854ea61-baf9-4074-a5f7-f896558eb37d" variableName="customerID"/>
+        <ee:transform doc:name="loan details for particular for laon type">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    loan_id: vars.loantype ++ "_" ++ uuid(),
+    loan_amount: 20000,
+    tenure: 60,
+    interest: 8
+  }, 
+  {
+    loan_id:vars.loantype ++ "_" ++ uuid(),
+    loan_amount: 30000,
+    tenure: 40,
+    interest: 7
+  }
+] as Array {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	</mule>
